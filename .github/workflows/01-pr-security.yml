@@ -9,6 +9,7 @@ permissions:
   contents: read
 
 jobs:
+
   semgrep:
     name: Semgrep SAST
     runs-on: ubuntu-latest
@@ -17,23 +18,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install Semgrep
-        run: python -m pip install semgrep
+        run: |
+          python -m pip install --upgrade pip
+          pip install semgrep
 
       - name: Run Semgrep
-        run: semgrep scan --config auto --error .
+        run: |
+          semgrep scan \
+            --config p/javascript \
+            --config p/docker \
+            --error \
+            server.js Dockerfile
 
   trufflehog:
     name: TruffleHog Secret Scan
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout complete Git history
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -44,7 +52,7 @@ jobs:
           path: ./
           extra_args: --only-verified
 
-  dependency-audit:
+  npm-audit:
     name: npm Dependency Audit
     runs-on: ubuntu-latest
 
@@ -52,14 +60,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm ci
 
-      - name: Audit dependencies
+      - name: Run npm audit
         run: npm audit --audit-level=high

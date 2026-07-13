@@ -16,4 +16,6 @@ COPY --from=builder --chown=nonroot:nonroot /app /app
 
 EXPOSE 3000
 
+USER nonroot
+
 CMD ["server.js"]
