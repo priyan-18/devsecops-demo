@@ -1,0 +1,31 @@
+name: 03 - Trivy Image Scan
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  trivy-image-scan:
+    name: Trivy Container Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t devsecops-demo:scan .
+
+      - name: Run Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: devsecops-demo:scan
+          scan-type: image
+          format: table
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"

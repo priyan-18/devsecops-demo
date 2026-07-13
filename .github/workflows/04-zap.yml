@@ -1,0 +1,76 @@
+name: 04 - OWASP ZAP
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  zap-baseline:
+    name: OWASP ZAP Baseline Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Docker network
+        run: docker network create devsecops-network
+
+      - name: Build application image
+        run: docker build -t devsecops-demo:zap .
+
+      - name: Start application container
+        run: |
+          docker run -d \
+            --name devsecops-app \
+            --network devsecops-network \
+            devsecops-demo:zap
+
+      - name: Wait for application
+        run: |
+          for i in {1..30}; do
+            if docker run --rm \
+              --network devsecops-network \
+              curlimages/curl:latest \
+              --fail http://devsecops-app:3000; then
+              echo "Application is ready"
+              exit 0
+            fi
+
+            echo "Waiting for application..."
+            sleep 2
+          done
+
+          echo "Application failed to start"
+          docker logs devsecops-app
+          exit 1
+
+      - name: Run ZAP Baseline Scan
+        run: |
+          docker run --rm \
+            --network devsecops-network \
+            -v "${{ github.workspace }}:/zap/wrk/:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t http://devsecops-app:3000 \
+            -r zap-report.html \
+            -J zap-report.json \
+            -I
+
+      - name: Upload ZAP reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-security-reports
+          path: |
+            zap-report.html
+            zap-report.json
+          if-no-files-found: warn
+
+      - name: Stop application
+        if: always()
+        run: |
+          docker rm -f devsecops-app || true
+          docker network rm devsecops-network || true
