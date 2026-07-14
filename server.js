@@ -1,24 +1,20 @@
-const express = require('express');
-
-// nosemgrep: javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage
+const express = require("express");
 const app = express();
 
-const PORT = 3000;
-
-app.get('/', (req, res) => {
-    res.send('DevSecOps Demo Application');
+app.get("/", (req, res) => {
+    res.send("Hello DevSecOps!");
 });
-app.get('/unsafe', (req, res) => {
-    const command = req.query.command;
 
-    require('child_process').exec(command, (error, stdout) => {
-        if (error) {
-            return res.status(500).send(error.message);
-        }
+const sqlite3 = require("sqlite3").verbose();
+const db = new sqlite3.Database(":memory:");
 
-        res.send(stdout);
+app.get("/user", (req, res) => {
+    const id = req.query.id;
+    db.all("SELECT * FROM users WHERE id = " + id, (err, rows) => {
+        res.json(rows);
     });
 });
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+
+app.listen(3000, () => {
+    console.log("Server running on http://localhost:3000");
 });
