@@ -1,0 +1,12 @@
+rules:
+  - id: nodejs-user-input-command-execution
+    message: User-controlled input is passed to child_process.exec, causing command injection.
+    severity: ERROR
+    languages:
+      - javascript
+    patterns:
+      - pattern-either:
+          - pattern: exec(req.$ANY, ...)
+          - pattern: exec($REQ.query.$PARAM, ...)
+          - pattern: $CP.exec(req.$ANY, ...)
+          - pattern: $CP.exec($REQ.query.$PARAM, ...)

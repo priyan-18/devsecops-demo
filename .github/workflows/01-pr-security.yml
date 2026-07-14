@@ -31,6 +31,7 @@ jobs:
       - name: Run Semgrep
         run: |
           semgrep scan \
+            --config .semgrep/custom-rules.yml \
             --config p/javascript \
             --config p/docker \
             --error \
