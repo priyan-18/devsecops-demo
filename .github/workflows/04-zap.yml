@@ -1,4 +1,4 @@
-name: 04 - OWASP ZAP
+name: 04 - OWASP ZAP Baseline Scan
 
 on:
   workflow_dispatch:
@@ -7,34 +7,28 @@ permissions:
   contents: read
 
 jobs:
-  zap-baseline:
-    name: OWASP ZAP Baseline Scan
+  zap-scan:
+    name: Run OWASP ZAP
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create Docker network
-        run: docker network create devsecops-network
-
       - name: Build application image
         run: docker build -t devsecops-demo:zap .
 
-      - name: Start application container
+      - name: Start application
         run: |
           docker run -d \
             --name devsecops-app \
-            --network devsecops-network \
+            -p 3000:3000 \
             devsecops-demo:zap
 
       - name: Wait for application
         run: |
           for i in {1..30}; do
-            if docker run --rm \
-              --network devsecops-network \
-              curlimages/curl:latest \
-              --fail http://devsecops-app:3000; then
+            if curl --fail http://localhost:3000; then
               echo "Application is ready"
               exit 0
             fi
@@ -50,11 +44,11 @@ jobs:
       - name: Run ZAP Baseline Scan
         run: |
           docker run --rm \
-            --network devsecops-network \
+            --network host \
             -v "${{ github.workspace }}:/zap/wrk/:rw" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
-            -t http://devsecops-app:3000 \
+            -t http://localhost:3000 \
             -r zap-report.html \
             -J zap-report.json \
             -I
@@ -69,8 +63,10 @@ jobs:
             zap-report.json
           if-no-files-found: warn
 
+      - name: Show application logs
+        if: failure()
+        run: docker logs devsecops-app
+
       - name: Stop application
         if: always()
-        run: |
-          docker rm -f devsecops-app || true
-          docker network rm devsecops-network || true
+        run: docker rm -f devsecops-app || true
