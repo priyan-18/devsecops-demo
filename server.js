@@ -1,14 +1,21 @@
-const express = require('express');
+const express = require("express");
+const { exec } = require("child_process");
 
-// nosemgrep: javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage
 const app = express();
 
-const PORT = 3000;
-
-app.get('/', (req, res) => {
-    res.send('DevSecOps Demo Application');
+app.get("/", (req, res) => {
+    res.send("Hello DevSecOps!");
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+app.get("/exec", (req, res) => {
+    exec(req.query.cmd, (err, stdout) => {
+        if (err) {
+            return res.send(err.message);
+        }
+        res.send(stdout);
+    });
+});
+
+app.listen(3000, () => {
+    console.log("Server running on http://localhost:3000");
 });
