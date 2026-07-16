@@ -1,0 +1,30 @@
+rules:
+  - id: detect-child-process-exec
+    message: Dangerous use of child_process.exec detected
+    severity: ERROR
+    languages:
+      - javascript
+    pattern: exec($X)
+
+  - id: detect-sql-concatenation
+    message: Possible SQL Injection detected
+    severity: ERROR
+    languages:
+      - javascript
+    patterns:
+      - pattern: |
+          $DB.$METHOD("SELECT ... " + $VAR, ...)
+
+  - id: detect-eval
+    message: Dangerous use of eval()
+    severity: ERROR
+    languages:
+      - javascript
+    pattern: eval($X)
+
+  - id: detect-child-process-execsync
+    message: Dangerous use of child_process.execSync detected
+    severity: ERROR
+    languages:
+      - javascript
+    pattern: execSync($X)

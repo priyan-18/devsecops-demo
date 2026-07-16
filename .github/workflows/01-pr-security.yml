@@ -31,11 +31,12 @@ jobs:
       - name: Run Semgrep
         run: |
           semgrep scan \
-          --config p/javascript \
-          --config p/docker \
-          --config custom-rules.yml \
-          --error \
-          server.js Dockerfile
+            --config p/security-audit \
+            --config p/owasp-top-ten \
+            --config p/nodejs \
+            --config p/docker \
+            --config custom-rules.yml \
+            --error .
 
   trufflehog:
     name: TruffleHog Secret Scan
