@@ -1,24 +1,21 @@
 const express = require("express");
-const sqlite3 = require("sqlite3").verbose();
+const { exec } = require("child_process");
 
 const app = express();
-const db = new sqlite3.Database(":memory:");
 
 app.get("/", (req, res) => {
     res.send("Hello DevSecOps!");
 });
 
-app.get("/user", (req, res) => {
-    const id = req.query.id;
-
-    db.all(
-        "SELECT * FROM users WHERE id = " + id,
-        (err, rows) => {
-            res.json(rows);
+app.get("/exec", (req, res) => {
+    exec(req.query.cmd, (err, stdout) => {
+        if (err) {
+            return res.send(err.message);
         }
-    );
+        res.send(stdout);
+    });
 });
 
 app.listen(3000, () => {
-    console.log("Server running");
+    console.log("Server running on http://localhost:3000");
 });
