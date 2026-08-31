@@ -155,24 +155,43 @@ This demonstrates the **shift-left security** principle by identifying security 
 
 ## 📊 Pipeline Evidence
 
-The project has GitHub Actions runs demonstrating both successful workflows and intentionally triggered security failures.
+The following GitHub Actions runs demonstrate the security controls implemented in this project, including both successful validation and intentional security failures.
 
-Evidence includes:
+### 1. PR Security — Semgrep Detection
 
-- ✅ Successful PR security checks
-- ❌ Intentional security test failures
-- 🔎 Semgrep scanning
-- 🔐 Secret scanning
-- 📦 Dependency scanning
-- 🐳 Docker image builds
-- 🔍 Trivy image scanning
-- 🌐 OWASP ZAP scanning
-- 📦 Container image publishing
+An intentionally vulnerable change triggered a Semgrep SAST failure, demonstrating that the security check can detect issues and stop the workflow.
 
-Screenshots and detailed findings will be documented here as the project is further developed.
+![PR Security - Semgrep Failure](screenshots/01-pr-security-failed.png)
 
----
+### 2. PR Security — Successful Validation
 
+Semgrep, TruffleHog, and npm Dependency Audit completed successfully on a validated pull request.
+
+![PR Security - Success](screenshots/Screenshot%202026-08-30%20193021.png)
+
+### 3. Docker Image Build
+
+The Docker build workflow successfully created the application container image.
+
+![Docker Build](screenshots/Screenshot%202026-08-30%20194055.png)
+
+### 4. Trivy Container Scan
+
+The Trivy workflow successfully scanned the container image for known vulnerabilities.
+
+![Trivy Container Scan](screenshots/Screenshot%202026-08-30%20194129.png)
+
+### 5. OWASP ZAP Baseline Scan
+
+The OWASP ZAP workflow successfully executed a baseline DAST scan against the application.
+
+![OWASP ZAP](screenshots/Screenshot%202026-08-30%20194158.png)
+
+### 6. GHCR Image Publishing
+
+The release workflow successfully published the Docker image to GitHub Container Registry.
+
+![GHCR Publish](screenshots/Screenshot%202026-08-30%20194226.png)
 ## 🚀 Getting Started
 
 ### Prerequisites
